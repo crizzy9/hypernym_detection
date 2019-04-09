@@ -16,12 +16,23 @@ from sklearn.metrics.pairwise import cosine_similarity
 from nltk.corpus import stopwords
 
 
+def readInChunks(fileObj, chunkSize=2048):
+    """
+    Lazy function to read a file piece by piece.
+    Default chunk size: 2kB.
+    """
+    while True:
+        data = fileObj.read(chunkSize)
+        if not data:
+            break
+        yield data
+
 
 punct = set(string.punctuation)
 stopwords_set = set(stopwords.words('english'))
 
 
-corpus = glob.glob("../corpus" + "/wackypedia_en1")
+corpus = glob.glob("./corpus" + "/*.xml")
 
 
 evalwords = []
@@ -31,16 +42,19 @@ with open("test_words.txt", "r") as fp:
 for word in text:
     evalwords.append(word.strip().lower())
 
+file_name = 'processed_file.txt'
+new_file = open(file_name, 'w+')
 
-data = []
+# data = []
+print(corpus)
 for text_file in corpus:
-    with open(text_file, "r", errors="ignore", encoding="utf-8") as fp:
-        print('Processing file {}'.format(text_file))
+    fp = open(text_file, "r", errors="ignore", encoding="utf-8")
+    print('Processing file {}'.format(text_file))
 
+    for chunk in readInChunks(fp):
         line = []
-        count = 0
 
-        for i in fp:
+        for i in chunk:
             
             line_flag = False
             token = i.strip().split("\t")[0]
@@ -62,34 +76,39 @@ for text_file in corpus:
                     else:
                         pass
 
+                flag = True
                 if flag and len(final_line) > 5:
-                    count += 1
-                    print("appending line: {}".format(count))
-                    data.append(final_line)
+                    new_file.write(final_line + '\n')
+
                 else:
                     pass
             else:
                 pass
+    fp.close()
 
 
-print(data)
-print(len(data))
-tok2indx = dict()
-unigram_counts = Counter()
-for ii, line in enumerate(data):
-    for token in line:
-        #if token.lower in evalwords:
-        if True:
-            unigram_counts[token] += 1
-            if token not in tok2indx:
-                tok2indx[token] = len(tok2indx)
-        else:
-            pass
+new_file.close()
 
-indx2tok = {indx:tok for tok,indx in tok2indx.items()}
+# print(data)
+# print(len(data))
 
-pickle.dump(indx2tok, open( "indx2tok.pkl", "wb" ))
-pickle.dump(tok2indx, open( "tok2indx.pkl", "wb" ))
+#######################
+#tok2indx = dict()
+#unigram_counts = Counter()
+#for ii, line in enumerate(data):
+#    for token in line:
+#        #if token.lower in evalwords:
+#        if True:
+#            unigram_counts[token] += 1
+#            if token not in tok2indx:
+#                tok2indx[token] = len(tok2indx)
+#        else:
+#            pass
+
+#indx2tok = {indx:tok for tok,indx in tok2indx.items()}
+
+#pickle.dump(indx2tok, open( "indx2tok.pkl", "wb" ))
+#pickle.dump(tok2indx, open( "tok2indx.pkl", "wb" ))
 
 
 
@@ -98,24 +117,25 @@ pickle.dump(tok2indx, open( "tok2indx.pkl", "wb" ))
 #print('most common: {}'.format(unigram_counts.most_common(10)))
 
 
-back_window = 2
-front_window = 2
-skipgram_counts = Counter()
-for iline, line in enumerate(data):
-    for ifw, fw in enumerate(line):
+#######################
+# back_window = 2
+# front_window = 2
+# skipgram_counts = Counter()
+# for iline, line in enumerate(data):
+#     for ifw, fw in enumerate(line):
 
-        if fw.lower() in evalwords:
-            icw_min = max(0, ifw - back_window)
-            icw_max = min(len(line) - 1, ifw + front_window)
-            icws = [ii for ii in range(icw_min, icw_max + 1) if ii != ifw]
-            for icw in icws:
-                skipgram = (line[ifw], line[icw])
-                skipgram_counts[skipgram] += 1
-        else:
-            pass    
+#         if fw.lower() in evalwords:
+#             icw_min = max(0, ifw - back_window)
+#             icw_max = min(len(line) - 1, ifw + front_window)
+#             icws = [ii for ii in range(icw_min, icw_max + 1) if ii != ifw]
+#             for icw in icws:
+#                 skipgram = (line[ifw], line[icw])
+#                 skipgram_counts[skipgram] += 1
+#         else:
+#             pass    
 
-pickle.dump(skipgram, open( "skipgram.pkl", "wb" ))
-pickle.dump(skipgram_counts, open( "skipgram_counts.pkl", "wb" ))
+# pickle.dump(skipgram, open( "skipgram.pkl", "wb" ))
+# pickle.dump(skipgram_counts, open( "skipgram_counts.pkl", "wb" ))
 
 
 #print('done skipgram')
