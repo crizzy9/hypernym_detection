@@ -51,17 +51,14 @@ for text_file in corpus:
             elif token in punct or token in stopwords_set:
                 pass
             else:
-                line.append(i.strip().split("\t")[0])
+                line.append(i.strip().split("\t")[0].lower())
 
 
             if line_flag:
                 flag = False
                 for word in final_line:
-                    for w in evalwords:
-                        if w.lower() == word.lower():
-                            flag = True
-                        else:
-                            pass
+                    if word in evalwords:
+                        flag = True
                     else:
                         pass
 
@@ -73,7 +70,8 @@ for text_file in corpus:
                 pass
 
 
-
+print(data)
+print(len(data))
 tok2indx = dict()
 unigram_counts = Counter()
 for ii, line in enumerate(data):
