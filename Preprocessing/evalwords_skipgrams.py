@@ -21,7 +21,7 @@ punct = set(string.punctuation)
 stopwords_set = set(stopwords.words('english'))
 
 
-corpus = glob.glob("../corpus" + "/*")
+corpus = glob.glob("../corpus" + "/wackypedia_en1")
 
 
 evalwords = []
@@ -38,6 +38,7 @@ for text_file in corpus:
         print('Processing file {}'.format(text_file))
 
         line = []
+        count = 0
 
         for i in fp:
             
@@ -53,7 +54,6 @@ for text_file in corpus:
             else:
                 line.append(i.strip().split("\t")[0].lower())
 
-
             if line_flag:
                 flag = False
                 for word in final_line:
@@ -63,6 +63,8 @@ for text_file in corpus:
                         pass
 
                 if flag and len(final_line) > 5:
+                    count += 1
+                    print("appending line: {}".format(count))
                     data.append(final_line)
                 else:
                     pass
