@@ -8,6 +8,7 @@ from nltk.corpus import stopwords
 import numpy as np
 import pandas as pd
 import pickle
+import sys
 from scipy import sparse
 from scipy.sparse import linalg 
 from sklearn.preprocessing import normalize
@@ -22,27 +23,6 @@ stopwords_set = set(stopwords.words('english'))
 
 corpus = glob.glob("corpus" + "/*.xml")
 
-data = []
-for text_file in corpus:
-    with open(text_file, "r", errors="ignore", encoding="utf-8") as fp:
-
-        text = fp.readlines()
-        line = []
-        for i in text:
-            token = i.strip().split("\t")[0]
-            if token == "<s>":
-                line = []
-            elif token == "</s>":
-                if len(line) > 5:
-                    data.append(line)
-                else:
-                    pass
-            elif token in punct or token in stopwords_set:
-                pass
-            else:
-                line.append(i.strip().split("\t")[0])
-
-
 
 evalwords = []
 with open("test_words.txt", "r") as fp:
@@ -50,6 +30,47 @@ with open("test_words.txt", "r") as fp:
 
 for word in text:
     evalwords.append(word.strip().lower())
+
+
+
+data = []
+for text_file in corpus:
+    with open(text_file, "r", errors="ignore", encoding="utf-8") as fp:
+
+        line = []
+
+        for i in fp:
+            
+            line_flag = False
+            token = i.strip().split("\t")[0]
+            if token == "<s>":
+                line = []
+            elif token == "</s>":
+                final_line = line
+                line_flag = True
+            elif token in punct or token in stopwords_set:
+                pass
+            else:
+                line.append(i.strip().split("\t")[0])
+
+
+            if line_flag:
+                flag = False
+                for word in final_line:
+                    for w in evalwords:
+                        if w.lower() == word.lower():
+                            flag = True
+                        else:
+                            pass
+                    else:
+                        pass
+
+                if flag and len(final_line) > 5:
+                    data.append(final_line)
+                else:
+                    pass
+            else:
+                pass
 
 
 
@@ -92,7 +113,7 @@ for iline, line in enumerate(data):
                 skipgram_counts[skipgram] += 1
         else:
             pass    
-        
+
 pickle.dump(skipgram, open( "skipgram.pkl", "wb" ))
 pickle.dump(skipgram_counts, open( "skipgram_counts.pkl", "wb" ))
 
