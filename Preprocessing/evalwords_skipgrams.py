@@ -21,7 +21,7 @@ punct = set(string.punctuation)
 stopwords_set = set(stopwords.words('english'))
 
 
-corpus = glob.glob("corpus" + "/*.xml")
+corpus = glob.glob("../corpus" + "/*")
 
 
 evalwords = []
@@ -32,10 +32,10 @@ for word in text:
     evalwords.append(word.strip().lower())
 
 
-
 data = []
 for text_file in corpus:
     with open(text_file, "r", errors="ignore", encoding="utf-8") as fp:
+        print('Processing file {}'.format(text_file))
 
         line = []
 
